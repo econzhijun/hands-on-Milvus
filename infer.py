@@ -1,7 +1,5 @@
 from __future__ import print_function
-import math
 import sys
-import argparse
 import numpy as np
 import paddle
 import paddle.fluid as fluid
@@ -10,10 +8,9 @@ import paddle.fluid.nets as nets
 from milvus import Milvus, IndexType, MetricType
 from functools import reduce
 import time
-import getopt
 
 PASS_NUM = 1
-use_cuda = 0
+use_cuda = True
 IS_SPARSE = True
 BATCH_SIZE = 256
 file = 'movies_data.txt'
@@ -55,7 +52,7 @@ def normaliz_data(vec_list):
     return vec_list
 
 
-def infer(use_cuda, params_dirname, gender, age, job, mov_id=783,category=[10,8,9],title=[1069, 4140, 2923, 710, 988]):
+def infer(use_cuda, params_dirname, user_id, gender, age, job, mov_id=783,category=[10,8,9],title=[1069, 4140, 2923, 710, 988]):
     place = fluid.CUDAPlace(0) if use_cuda else fluid.CPUPlace()
     exe = fluid.Executor(place)
     inference_scope = fluid.core.Scope()
@@ -64,7 +61,7 @@ def infer(use_cuda, params_dirname, gender, age, job, mov_id=783,category=[10,8,
         [inferencer, feed_target_names,fetch_targets] = fluid.io.load_inference_model(params_dirname, exe)
 
         assert feed_target_names[0] == "user_id"
-        user_id = fluid.create_lod_tensor([[np.int64(1)]], [[1]], place)
+        user_id = fluid.create_lod_tensor([[np.int64(user_id)]], [[1]], place)
 
         assert feed_target_names[1] == "gender_id"
         gender_id = fluid.create_lod_tensor([[np.int64(gender)]], [[1]], place)
@@ -131,8 +128,8 @@ def milvus_test(usr_features, IS_INFER, mov_features=None, ids=None):
 
         print(milvus.create_collection(param))
 
-        mov_features = normaliz_data(mov_features)
-        status, ids = milvus.insert(collection_name=table_name, records=mov_features, ids = ids)
+        movie_embeddings = normaliz_data(mov_features)
+        status, ids = milvus.insert(collection_name=table_name, records=movie_embeddings, ids = ids)
 
         time.sleep(1)
 
@@ -157,29 +154,8 @@ def milvus_test(usr_features, IS_INFER, mov_features=None, ids=None):
     # status = milvus.drop_table(table_name)
 
 
-def main(argv, use_cuda, age=0, gender=1, job=10, mov_features=None, ids=None, IS_INFER = False):
-    if use_cuda and not fluid.core.is_compiled_with_cuda():
-        return
+def main(use_cuda=True, user_id=0, age=0, gender=1, job=10, mov_features=None, ids=None, IS_INFER = False):
     params_dirname = "recommender_system.inference.model"
-
-    try:
-        opts, args = getopt.getopt(
-            sys.argv[1:],
-            "g:entry:j:i",
-            ["gender=", "age=", "job=", "infer"],
-        )
-    except getopt.GetoptError:
-        print("Usage: test.py -entry age -g gender -j job --infer")
-        sys.exit(2)
-    for opt_name, opt_value in opts:
-        if opt_name in ("-entry", "--age"):
-            age = opt_value
-        if opt_name in ("-g", "--gender"):
-            gender = opt_value
-        if opt_name in ("-j", "--job"):
-            job = opt_value
-        if opt_name in ("-i", "--infer"):
-            IS_INFER = True
 
     if IS_INFER:
         usr_features, mov_features, ids = get_infer_vectors(use_cuda, params_dirname, gender, age, job)
@@ -191,4 +167,4 @@ def main(argv, use_cuda, age=0, gender=1, job=10, mov_features=None, ids=None, I
 
 
 if __name__ == '__main__':
-    main(sys.argv[1:], use_cuda)
+    main()
