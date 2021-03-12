@@ -95,7 +95,7 @@ for result in enumerate(results[0]):
 
 Hurray! We successfully obtain the result instantaneously and these are all great action movies! Thanks to the powerful Milvus, we can easily make recommendations to users based on their preferences.
 
-```python
+```bash
 Status(code=0, message='Search vectors successfully!')
 ID      Title           		     Similarity
 3184    Rush Hour         		     2.981
