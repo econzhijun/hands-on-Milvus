@@ -4,8 +4,12 @@
 
 # A taste of the Milvus search engine
 
-|          |                            Config                            |
-| :------: | :----------------------------------------------------------: |
+|          | Config                                                       |
+| :------: | :----------------------------------------------------------- |
+|   CPU    | Intel(R) Core(TM) i7-7700K CPU @ 4.20GHz                     |
+|   GPU    | GeForce GTX 1050 Ti 4GB                                      |
+|  Memory  | 32GB                                                         |
+|    OS    | Ubuntu 18.04                                                 |
 | Software | Milvus 0.10.6 <br />pymilvus 0.4.0  <br />PaddlePaddle 2.0.1  <br />Docker 20.10.2 <br> |
 
 This project is intended to explore the vector similarity search engine [Milvus](https://milvus.io/) by integrating it with a movie recommendation system. The main idea is that, after training the neural network for recommender, we extract all the movie embeddings into a Milvus collection. Then we, as some special users (cold starters for the recommendation system), can input our personal information and movie preferences into the neural network and update the parameters, after which we can extract our specific user embeddings.  Now we can query the Milvus collection to search for the movie embeddings most similar to our user embeddings, and the corresponding result movies would highly likely be great recommendations for us.
@@ -97,7 +101,7 @@ for result in enumerate(results[0]):
         print(result.id, "\t", title, "\t", round(float(result.distance) * 5, 3))
 ```
 
-Hurray! We successfully obtain the result instantaneously and these are all great action movies! Thanks to the powerful Milvus, we can easily make recommendations to users based on their preferences.
+Hurray! We successfully obtain the result instantaneously and these are all great action movies! Thanks to the powerfulness of Milvus, we can easily make recommendations to users based on their preferences.
 
 ```bash
 Status(code=0, message='Search vectors successfully!')
@@ -109,6 +113,34 @@ ID      Title                        Similarity
 3467    The Mask of Zorro            2.816		 
 1562    Batman & Robin               2.783
 ```
+
+
+
+## Thoughts
+
+It has been super easy and painlessly to set up and use Milvus. It is very user-friendly to support both Numpy ndarray and Python list as the data type for search vectors. And from my hands on experience with Milvus, I believe it can readily scale to much larger datasets. 
+
+### Use case
+
+I notice that the blogs and documents from both Zilliz and Milvus have covered a lot of use cases in the industry, including image search, text search, molecular structural similarity analysis, audio data processing and so on. **I would like to point out one more potential use case, that is, DNA sequences analysis**. Evaluating the similarity between DNA sequences is crucial for the sequence analysis and its applications include discovering the evolutionary relationship between species and searching similar sequences in huge databases.  Researchers generally apply sequence alignment algorithm to compute the similarity between two sequences, which, unfortunately, depends on the orderings of the nucleotides and may be computationally prohibitive. Recently, many alignment-free algorithms have been proposed, for example, construct representative vectors based on frequency patterns and entropy. I believe Milvus could benefit from these algorithms, because they provide effective ways to represent DNA sequence as vectors, and then we can take advantage of the powerful Milvus engine to search for similar DNA sequences.
+
+### Implementation suggestion
+
+- It would be great if Milvus can support customized distance metric. Currently the choice for distance metrics is limited. Of course the Euclidean distance, Inner product and Jaccard similarity would be enough for most situations, but it's possible that users might want use his own definition of distance, for example, weighted Euclidean distance where some dimension might be more important than the other dimensions. 
+- 
+
+
+Overall, Milvus is a remarkable and powerful open-source engine, 
+
+And I'd be honored if I had a chance to join this great community.
+
+
+
+
+
+
+
+
 
 
 
