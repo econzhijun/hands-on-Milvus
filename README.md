@@ -126,13 +126,12 @@ I notice that the blogs and documents from both Zilliz and Milvus have covered a
 
 ### Implementation suggestion
 
-- It would be great if Milvus can support customized distance metric. Currently the choice for distance metrics is limited. Of course the Euclidean distance, Inner product and Jaccard similarity would be enough for most situations, but it's possible that users might want use his own definition of distance, for example, weighted Euclidean distance where some dimension might be more important than the other dimensions. 
-- 
+- It would be great if Milvus can support customized distance metric. Currently the choice for distance metrics is limited. Of course the Euclidean distance, Inner product and Jaccard similarity would be enough for most situations, but it's possible that users might want to use his own definition of distance, for example, weighted Euclidean distance where some dimension might be more important than the other dimensions. I understand that in the embeddings generated from deep learning models, all dimensions have the same scale and no any dimension is more important than the other, so a weighted distance is unnecessary. However, I think Milvus should not always be bundled with neural network embeddings.
+- Currently the records to be searched must have the same dimension, otherwise the Milvus client would throw a `ParamError`. However, in some cases, the vectors might have different sizes. For example, in the DNA sequences analysis I mentioned above, the two DNA sequence vectors would not necessarily have the same size. It would be great if Milvus can support variable input dimension. Of course the standard distance metrics like Euclidean distance and Inner product would not work for vectors of different sizes, that's why I suggest supporting customized distance metric above.
 
 
-Overall, Milvus is a remarkable and powerful open-source engine, 
 
-And I'd be honored if I had a chance to join this great community.
+Overall, Milvus is a remarkable and powerful open-source engine, helping so many companies and individuals to gain actionable insights from the vast amount of unstructured data (I believe this will be the main focus of data science in the next five years) instead of letting such data go wasted and ignored. Milvus indeed contributes a lot to the society as a whole. And I'd be honored if I had a chance to join this great community.
 
 
 
