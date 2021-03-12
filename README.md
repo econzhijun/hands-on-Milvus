@@ -4,6 +4,10 @@
 
 # A taste of the Milvus search engine
 
+|          |                            Config                            |
+| :------: | :----------------------------------------------------------: |
+| Software | Milvus 0.10.6 <br />pymilvus 0.4.0  <br />PaddlePaddle 2.0.1  <br />Docker 20.10.2 <br> |
+
 This project is intended to explore the vector similarity search engine [Milvus](https://milvus.io/) by integrating it with a movie recommendation system. The main idea is that, after training the neural network for recommender, we extract all the movie embeddings into a Milvus collection. Then we, as some special users (cold starters for the recommendation system), can input our personal information and movie preferences into the neural network and update the parameters, after which we can extract our specific user embeddings.  Now we can query the Milvus collection to search for the movie embeddings most similar to our user embeddings, and the corresponding result movies would highly likely be great recommendations for us.
 
 We would use the public [Movielens](https://grouplens.org/datasets/movielens/) dataset as source of data and PaddlePaddle as the deep learning framework. Since this project is mainly about Milvus, we won't go into great details about the neural network. The network architecture basically looks like the following, and we mainly interested in making use of the user embeddings and movie embeddings. 
