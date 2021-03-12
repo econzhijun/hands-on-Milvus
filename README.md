@@ -97,7 +97,7 @@ Hurray! We successfully obtain the result instantaneously and these are all grea
 
 ```bash
 Status(code=0, message='Search vectors successfully!')
-ID      Title           		     Similarity
+ID      Title                        Similarity
 3184    Rush Hour                    2.981
 2628    Star Wars: Episode I         2.924
 2571    The Matrix                   2.858
