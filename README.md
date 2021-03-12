@@ -95,7 +95,7 @@ status, results = milvus.search(**param)
 print(status)
 
 print("ID\t", "Title\t", "Similarity")
-for result in enumerate(results[0]):
+for result in results[0]:
     if result.id not in my_favorite_movies:
         title = paddle.dataset.movielens.movie_info()[int(result.id)].title
         print(result.id, "\t", title, "\t", round(float(result.distance) * 5, 3))
