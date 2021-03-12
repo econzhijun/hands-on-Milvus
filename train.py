@@ -1,7 +1,5 @@
-from __future__ import print_function
 import math
 import sys
-import argparse
 import numpy as np
 import paddle
 import paddle.fluid as fluid
@@ -10,21 +8,6 @@ import paddle.fluid.nets as nets
 
 IS_SPARSE = True
 BATCH_SIZE = 256
-
-
-def parse_args():
-    parser = argparse.ArgumentParser("recommender_system")
-    parser.add_argument(
-        '--enable_ce',
-        action='store_true',
-        help="If set, run the task with continuous evaluation logs.")
-    parser.add_argument(
-        '--use_gpu', type=int, default=0, help="Whether to use GPU or not.")
-    parser.add_argument(
-        '--num_epochs', type=int, default=1, help="number of epochs.")
-    args = parser.parse_args()
-    return args
-
 
 def get_usr_combined_features():
 
@@ -151,21 +134,13 @@ def optimizer_func():
     return fluid.optimizer.SGD(learning_rate=0.2)
 
 
-def train(use_cuda, params_dirname):
+def train(params_dirname, use_cuda=True, num_epochs=50):
     place = fluid.CUDAPlace(0) if use_cuda else fluid.CPUPlace()
 
-    if args.enable_ce:
-        train_reader = paddle.batch(
-            paddle.dataset.movielens.train(), batch_size=BATCH_SIZE)
-        test_reader = paddle.batch(
-            paddle.dataset.movielens.test(), batch_size=BATCH_SIZE)
-    else:
-        train_reader = paddle.batch(
-            paddle.reader.shuffle(
-                paddle.dataset.movielens.train(), buf_size=8192),
-            batch_size=BATCH_SIZE)
-        test_reader = paddle.batch(
-            paddle.dataset.movielens.test(), batch_size=BATCH_SIZE)
+    train_reader = paddle.batch(
+        paddle.dataset.movielens.train(), batch_size=BATCH_SIZE)
+    test_reader = paddle.batch(
+        paddle.dataset.movielens.test(), batch_size=BATCH_SIZE)
 
     feed_order = [
         'user_id', 'gender_id', 'age_id', 'job_id', 'movie_id', 'category_id',
@@ -174,9 +149,8 @@ def train(use_cuda, params_dirname):
 
     main_program = fluid.default_main_program()
     star_program = fluid.default_startup_program()
-    if args.enable_ce:
-        main_program.random_seed = 90
-        star_program.random_seed = 90
+    main_program.random_seed = 90
+    star_program.random_seed = 90
 
     usr_combined_features, mov_combined_features, scale_infer, avg_cost = inference_program()
 
@@ -185,7 +159,6 @@ def train(use_cuda, params_dirname):
     sgd_optimizer.minimize(avg_cost)
     exe = fluid.Executor(place)
 
-    # [inferencer, feed_target_names, fetch_targets] = fluid.io.load_inference_model(params_dirname, exe)
 
     def train_test(program, reader):
         count = 0
@@ -211,7 +184,7 @@ def train(use_cuda, params_dirname):
         feeder = fluid.DataFeeder(feed_list, place)
         exe.run(star_program)
 
-        for pass_id in range(PASS_NUM):
+        for pass_id in range(num_epochs):
             for batch_id, data in enumerate(train_reader()):
                 # train entry mini-batch
                 outs = exe.run(
@@ -222,20 +195,12 @@ def train(use_cuda, params_dirname):
                 # get test avg_cost
                 test_avg_cost = train_test(test_program, test_reader)
 
-                # if test_avg_cost < 4.0: # Change this number to adjust accuracy
-                if batch_id == 20:
-
-                    if args.enable_ce:
-                        print("kpis\ttest_cost\t%f" % float(test_avg_cost))
-
-                    if params_dirname is not None:
-                        fluid.io.save_inference_model(params_dirname, [
-                            "user_id", "gender_id", "age_id", "job_id",
-                            "movie_id", "category_id", "movie_title"
-                        ], [scale_infer, usr_combined_features, mov_combined_features],exe)
-                    # return
-                print('EpochID {0}, BatchID {1}, Test Loss {2:0.2}'.format(
-                    pass_id + 1, batch_id + 1, float(test_avg_cost)))
+                if batch_id % 50 == 0 and params_dirname:
+                    fluid.io.save_inference_model(params_dirname, [
+                        "user_id", "gender_id", "age_id", "job_id",
+                        "movie_id", "category_id", "movie_title"
+                    ], [scale_infer, usr_combined_features, mov_combined_features],exe)
+                print('EpochID {0}, BatchID {1}, Test Loss {2:0.2}'.format(pass_id + 1, batch_id + 1, float(test_avg_cost)))
 
                 if math.isnan(float(out[0])):
                     sys.exit("got NaN loss, training failed.")
@@ -243,26 +208,7 @@ def train(use_cuda, params_dirname):
     train_loop()
 
 
-def main(use_cuda):
-    if use_cuda and not fluid.core.is_compiled_with_cuda():
-        return
-    params_dirname = "recommender_system.inference.model"
-    train(use_cuda=use_cuda, params_dirname=params_dirname)
-
-
-
-class some_args:
-
-    def __init__(self, ce = True, num_epochs = 50, use_gpu = False):
-        self.ce = ce
-        self.enable_ce = ce
-        self.num_epochs = num_epochs
-        self.use_gpu = use_gpu
-
 if __name__ == '__main__':
-    args = parse_args()
-    args = some_args()
-    PASS_NUM = args.num_epochs
-    use_cuda = args.use_gpu
-    main(use_cuda)
+    params_dirname = "recommender_system.inference.model"
+    train(params_dirname=params_dirname)
 

@@ -109,8 +109,8 @@ def infer(use_cuda, params_dirname, gender, age, job, mov_id=783,category=[10,8,
 
 def milvus_test(usr_features, IS_INFER, mov_features=None, ids=None):
     _HOST = '127.0.0.1'
-    _PORT = '19530'  # default value
-    table_name = 'recommender_demo'
+    _PORT = '19530'
+    table_name = 'recommendation_system'
     milvus = Milvus(_HOST, _PORT)
 
     if IS_INFER:
@@ -131,8 +131,8 @@ def milvus_test(usr_features, IS_INFER, mov_features=None, ids=None):
 
         print(milvus.create_collection(param))
 
-        insert_vectors = normaliz_data(mov_features)
-        status, ids = milvus.insert(collection_name=table_name, records=insert_vectors, ids = ids)
+        mov_features = normaliz_data(mov_features)
+        status, ids = milvus.insert(collection_name=table_name, records=mov_features, ids = ids)
 
         time.sleep(1)
 
