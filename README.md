@@ -2,11 +2,7 @@
 
 
 
-Milvus with
-
-
-
-
+# A taste of the Milvus search engine
 
 This project is intended to explore the vector similarity search engine Milvus by integrating it with a movie recommendation system. The main idea is that, after training the neural network for recommender, we extract all the movie embeddings into a Milvus collection. Then we, as some special users (cold starters for the recommendation system), can input our personal information and movie preferences into the neural network and update the parameters, after which we can extract our specific user embeddings.  Now we can query the Milvus collection to search for the movie embeddings most similar to our user embeddings, and the corresponding result movies would highly likely be great recommendations for us.
 
